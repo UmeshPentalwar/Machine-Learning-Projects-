@@ -1,11 +1,11 @@
 # Building SVM model for the prediction of borrowers paying the loan back.
-# Using historical loan data from "LendingClub" present at https://www.lendingclub.com/info/download-data.action 
+# Using historical loan data from "LendingClub" available at https://www.lendingclub.com/info/download-data.action 
 # Download the csv file to working directory and input it in workspace 
 
 loans <- read.csv('loan_data.csv')
-head(loans)
-str(loans)
-summary(loans)
+print(head(loans))
+print(str(loans))
+print(summary(loans))
 
 #Data clensing 
 
@@ -51,7 +51,7 @@ test <- loans[!sample,]
 #Model building and evaluation 
 library(e1071)
 model <- svm(not.fully.paid~.,data = train, kernel = 'radial')
-summary(model)
+print(summary(model))
 
 pred.result <- predict(model,test)
 #confusion matrix 
@@ -60,10 +60,12 @@ print(table(pred.result,test$not.fully.paid))
 
 #Tuning the model 
 tune.para <- tune(svm , not.fully.paid~.,data = train,kernel = 'radial',ranges = list(cost=10^(-1:2),gamma = c(0.1,1)))
+print(tune.para)
 
 #Tuning the model using cost = 10 & gamma = 0.1
 tuned.model <- svm(not.fully.paid~.,data= train ,kernel= 'radial',cost= 10,gamma = 0.1)
 results <- predict(tuned.model,test)
+#confusion matrix after tuning 
 print(table(results,test$not.fully.paid))
 
 ##Accuracy of svm increases after tuning 
