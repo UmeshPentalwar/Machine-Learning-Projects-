@@ -7,13 +7,13 @@ data('College')
 df <- College
 
 # Check the head of data frame 
-head(df)
+print(head(df))
 
 #Explore the structure of df
-str(df)
+print(str(df))
 
 #Check df for missing values 
-any(is.na(df))  #### no missing values 
+print(any(is.na(df))) #### no missing values 
 
 #Exploratory data analysis 
 
@@ -29,7 +29,8 @@ print(h1)
 
 #Histogram of Grad.Rate colored by Private
 h2 <- ggplot(df,aes(Grad.Rate))+geom_histogram(aes(fill = Private),color = 'black',bins = 50)
-#Colleges with higher grade rate tend to be private, there exist college with higher than 100% grad rate.
+print(h2)
+#Colleges with higher grade rate tend to be private, there exist college with Grade.Rate higher than 100% .
 
 #Finding and correcting the outliers 
 subset(df ,Grad.Rate > 100)
@@ -75,8 +76,8 @@ pred.Result <- predict(model,test)
 print(table(pred.Result,test$Private))
 model.accuracy <- (56+162)/(56+7+8+162)*100
 
-#Tree model accuraccy = 93.13
-#Random Forest model accuracy = 93.56 
+#Tree model accuraccy = 93.13%
+#Random Forest model accuracy = 93.56%
 
 
 
