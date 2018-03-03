@@ -19,12 +19,12 @@ print(any(is.na(df))) #### no missing values
 
 #Scatterplot of Grad.Rate versus Room.Board,colored by the Private column
 library(ggplot2)
-g <- ggplot(df, aes(Room.Board,Grad.Rate))+geom_point(aes(color = Private),size = 2, alpha = .5)
+g <-ggplot(df, aes(Room.Board,Grad.Rate))+geom_point(aes(color = Private),size = 2, alpha = .6)+ggtitle('Room.Board vs Grad.Rate')
 print(g)
 #Grade.Rate is greater for larger Room.Board values 
 
 #Histogram of full time undergrad students, color by Private
-h1 <- ggplot(df,aes(F.Undergrad))+geom_histogram(aes(fill = Private),bins = 50,color = 'black')
+h1 <-  ggplot(df,aes(F.Undergrad))+geom_histogram(aes(fill = Private),bins = 50,color = 'black')+ggtitle('F.Undergrad Histogram')
 print(h1)
 
 #Histogram of Grad.Rate colored by Private
