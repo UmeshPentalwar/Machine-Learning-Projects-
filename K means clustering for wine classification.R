@@ -1,5 +1,5 @@
 #Building K means model to classify the wine into two categories using the historical data 
-#and evaluating the model with the tain data 
+#and evaluating the model with the train data 
 #Using wine data present at http://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/
 #Downlod wine features data into working directory and load it in the workspace
 
