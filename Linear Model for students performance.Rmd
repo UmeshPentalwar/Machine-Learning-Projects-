@@ -1,0 +1,209 @@
+---
+title: "Linear Prediction Model"
+author: "UMESH PENTALWAR"
+output: html_document
+---
+
+```{r setup, include=FALSE }
+knitr::opts_chunk$set(echo = TRUE ,comment = '' )
+```
+
+Building a linear model to predict the student's exam scores and evaluating the model.  
+Getting the data from [Student Performance Data Set from UC Irvine's Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/Student+Performance).
+
+***
+
+**STEPS INVOLVED** 
+
+  * Data aquisition 
+  * Data cleaning 
+  * Exploratory Data Analysis (EDA)
+  * Model building 
+  * Train and Test Groups
+  * Model evaluation
+  
+  
+***
+
+ **Data Aquisition**  
+ Get the data from the repository and save it in the working directory then load it to df.  
+ 
+```{r , comment= ''}
+df <- read.csv('student-mat.csv' , sep = ';')
+head(df)
+
+```
+ 
+***
+
+```{r , comment= ''}
+summary(df) 
+
+```
+
+***
+
+ **Data cleaning**  
+ 
+ Checking for NA values 
+ 
+```{r, comment= ''}
+any(is.na(df))
+```
+ 
+ No missing values are found.  
+ Checking the types of observations present in dataset.
+ 
+```{r , comment= ''}
+str(df)
+```
+
+ Factor variables already have levels assigned to them so no need of imposing factor levels on them.
+ 
+***
+
+ **Exploratoty Data Analyis**
+ 
+```{r, warning=FALSE, message= FALSE }
+library(ggplot2)
+library(corrplot)
+library(dplyr)
+```
+
+ Grabing the Numeric data from dataset 
+ 
+```{r }
+num.col <- sapply( df , is.numeric)
+num.df <- df[,num.col]
+cor.data <- cor(num.df)
+cor.data 
+``` 
+
+ Ploting correlations between numeric variables 
+ 
+```{r , fig.width= 8, fig.height= 8}
+corrplot(cor.data , method = 'color')
+
+```
+
+ Cleary we have very high correlation between G1, G2, and G3 which makes sense since those are grades.  
+ Meaning good students do well each period, and poor students do poorly each period, etc. Also a high     G1,G2, or G3 value has a negative correlation with failure (number of past class failures).
+
+ Also Mother and Father education levels are correlated, which also makes sense.
+
+***
+
+ Checking the distribution of final scores 
+ 
+```{r , fig.width= 8 }
+g <- ggplot(df , aes(x = G3))+ geom_histogram(fill = 'blue',color = 'black', alpha = 0.4, bins = 20)
+g
+```
+
+ Looks like there are good number of students who got zero score,majority of students scored around    the mean of G3 which is around a score of 10.
+ 
+***
+
+ **Building a linear model**
+ 
+ Considering the predictors **G1**,**G2** & **failures** to predict G3 because  of the high linearity of  these predictors with the response.
+ Spliting the data into train & test sets using *caTools* libraray.Setting the  seed to 101 so that the results are reproducible.
+ 
+```{r , warning=FALSE,message=FALSE}
+library(caTools)
+set.seed(101)
+sample <- sample.split( df$G3 , SplitRatio = 0.7)
+train <- df[sample,]
+test <- df[!sample,]
+```
+
+***
+ **Model**
+```{r }
+fit <- lm(G3 ~ G1+G2+failures , data = train )
+summary(fit)
+```
+
+ Here the residual standard error is 2.019 and $R^2$ value is 0.8102 which is considerably good    for linear model.
+ 
+***
+ Ploting the residuals 
+
+```{r}
+resid <- data.frame(resid = fit$residuals)
+g <- ggplot(resid , aes(x = resid))+geom_histogram(fill = 'blue' , color = 'black',bins = 30 , alpha = 0.4)
+g
+```
+
+The residuals are roughly normally distributed,which is a good sign for the linear model.
+
+***
+ Evaluating the model for test data 
+ 
+```{r}
+pred.G3 <- predict(fit , newdata = test)
+
+```
+ Here model had predicted a -ve scores for some of the students.Correcting them with the adjustment.
+ 
+```{r}
+pred.G3 <- sapply(pred.G3 , function(x){if(x < 0 ){return(0)}else{return(x)}})
+
+``` 
+
+ Finding the mean squared error.
+ 
+```{r}
+mse <- mean((pred.G3 - test$G3)^2)
+mse
+```
+ 
+ The total variability and the $R^2$ value the fraction of variability explained by regressors are 
+ 
+```{r}
+sst <- sum((mean(df$G3) - test$G3)^2)
+sse <- sum((pred.G3 - test$G3)^2)
+R.square <- 1 - (sse/sst)
+```
+
+
+ So the mean squared error for the model testing is `r mse` and the $R^2$ value is `r R.square`.
+ Which indicates the better fit of the model.
+ 
+***
+
+Adding more predictors to the model 
+
+```{r }
+new.fit <- lm(G3 ~ ., data = train)
+summary(new.fit)
+```
+
+***
+ Comparing the two models on predictions 
+ 
+```{r}
+new.pred.G3 <- predict(new.fit , newdata = test )
+new.pred.G3 <- sapply(new.pred.G3 , function(x){if(x < 0 ){return(0)}else{return(x)}})
+```
+
+```{r}
+new.mse <- mean((new.pred.G3 - test$G3)^2)
+new.sse <- sum((new.pred.G3 - test$G3)^2)
+new.R.square <- 1 - (new.sse/sst)
+```
+
+ Comparison table for the two models 
+
+```{r}
+MSE <- c(mse , new.mse)
+R.SQUARE <- c(R.square , new.R.square)
+compare.table <- cbind(MSE , R.SQUARE)
+row.names(compare.table) <- c('fit' , 'new.fit')
+compare.table
+```
+
+ From the above comparison we can conclude that there is no significant improvement in the               prediction accuracy by including more predictors.  
+ 
+ 
+ 
